@@ -19,11 +19,11 @@ char  cChar = DEFAULT_CHAR;          // Character to fill buffer
 DWORD dwCount = DEFAULT_COUNT,         // Number of messages to send
 dwLength = DEFAULT_BUFFER_LENGTH; // Length of buffer to send
 char  szRecipient[128] = "127.0.0.1";   // Recipient's IP or hostname
-float packet[12];
-float freq, amplitude;
+double packet[12];
+double freq, amplitude;
 int direction;
 
-float forwardVelocity, verticalAccel, forwardAccel, lateralAccel, pitchAngle, rollAngle, heading, yawVelocity, onGroundIndicator;
+double forwardVelocity, verticalAccel, forwardAccel, lateralAccel, pitchAngle, rollAngle, heading, yawVelocity, onGroundIndicator;
 
 //auto start = std::chrono::high_resolution_clock::now();//time_t start = time(0);
 
@@ -166,12 +166,12 @@ int main()
 		cout << "Sending data..." << endl;
 		auto start = std::chrono::high_resolution_clock::now();//time_t start = time(0);
 
-		while (1)//for(i = 0; i < dwCount; i++)
+		while (1) //GetAsyncKeyState(VK_LCONTROL) == 0) //for(i = 0; i < dwCount; i++)
 		{
-			float timeStamp = (float)(chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - start).count()) / 1000; //Time Stamp (Seconds since Epoch)
+			double timeStamp = (double)(chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - start).count()) / 1000; //Time Stamp (Seconds since Epoch)
 			memcpy(sendbuf, &timeStamp, 4);
 			int timer = (int)timeStamp;
-			float angle = amplitude*sin(2 * 3.14159*freq*timeStamp);
+			double angle = amplitude*sin(2 * 3.14159*freq*timeStamp);
 			memcpy(&sendbuf[20 + direction * 4], &angle, 4);
 			ret = sendto(s, sendbuf, dwLength, 0,
 				(SOCKADDR *)&recipient, sizeof(recipient));
@@ -202,8 +202,8 @@ int main()
 	GlobalFree(sendbuf);
 	WSACleanup();
 
-	cout << "Enter any key to exit\n";
-	int j;
-	cin >> j;
+	//cout << "Enter any key to exit\n";
+	//int j;
+	//cin >> j;
 	return 0;
 }
