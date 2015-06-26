@@ -11,58 +11,74 @@
 #define DEFAULT_CHAR            '0'
 #define DEFAULT_BUFFER_LENGTH   48
 
-using namespace std;
-
 BOOL  bConnect = FALSE;                 // Connect to recipient first
 int   iPort = DEFAULT_PORT;          // Port to send data to
 char  cChar = DEFAULT_CHAR;          // Character to fill buffer
 DWORD dwCount = DEFAULT_COUNT,         // Number of messages to send
 dwLength = DEFAULT_BUFFER_LENGTH; // Length of buffer to send
 char  szRecipient[128] = "127.0.0.1";   // Recipient's IP or hostname
-double packet[12];
+float packet[12];
 double freq, amplitude;
 int direction;
 
-double forwardVelocity, verticalAccel, forwardAccel, lateralAccel, pitchAngle, rollAngle, heading, yawVelocity, onGroundIndicator;
+float forwardVelocity, verticalAccel, forwardAccel, lateralAccel, pitchAngle, rollAngle, heading, yawVelocity, onGroundIndicator;
 
-//auto start = std::chrono::high_resolution_clock::now();//time_t start = time(0);
+//auto start = std::std::chrono::high_resolution_clock::now();//time_t start = time(0);
 
 
 void getData()
 {
 	packet[0] = 0;
-	do {
-		cout << "Enter oscillation direction, 0 for pitch, 1 for roll: ";
-		cin >> direction;//Oscillation Direction
-	} while (direction > 1 || direction < 0);
-	do {
-		if (freq > 5 || freq < 0) cout << "Enter valid frequency ( [0-5] Hz): ";
-		else cout << "Frequency (Hz): ";
-		cin >> freq;//Oscillation Frequency
-	} while (freq > 5 || freq < 0);
-	do {
-		if (amplitude > 20 || amplitude < 0) cout << "Enter valid angle ( [0 - 20] Deg): ";
-		else cout << "Angle (Deg): ";
-		cin >> amplitude;//Oscillation Angle
-	} while (amplitude > 20 || amplitude < 0);
-	/*cout << "Forward Velocity (m/s, +ve front): ";
-	cin >> packet[1];//forwardVelocity;
-	cout << "Vertical Acceleration (G's, +ve up): ";
-	cin >> packet[2];//verticalAccel;
-	cout << "Forward Acceleration (G's, +ve front): ";
-	cin >> packet[3];//forwardAccel;
-	cout << "Lateral Acceleration (G's, +ve right): ";
-	cin >> packet[4];//lateralAccel;
-	cout << "Pitch Angle (Degrees, +ve nose up): ";
-	cin >> packet[5];//pitchAngle;
-	cout << "Roll Angle (Degrees, +ve bank right): ";
-	cin >> packet[6];//rollAngle;
-	cout << "Heading (Degrees, 0 = North, clockwise): ";
-	cin >> packet[7];//heading;
-	cout << "Yaw Velocity (m/s, +ve yaw right): ";
-	cin >> packet[8];//yawVelocity;
-	cout << "On Ground Indicator: (1 or 0): ";
-	cin >> packet[9];//onGroundIndicator;*/
+
+	std::cout << "Enter oscillation direction, 0 for pitch, 1 for roll: ";
+	std::cin >> direction; //Oscillation Direction
+	while ( std::cin.fail() || direction > 1 || direction < 0 )
+	{
+		std::cout << "Enter valid oscillation direction, 0 for pitch, 1 for roll: ";
+		std::cin.clear();
+		std::cin.ignore(256, '\n');
+		std::cin >> direction;
+	}
+
+	std::cout << "Frequency (Hz): ";
+	std::cin >> freq; //Oscillation Frequency
+	while ( std::cin.fail() || freq > 5 || freq < 0 )
+	{
+		std::cout << "Enter valid frequency ( [0-5] Hz): ";
+		std::cin.clear();
+		std::cin.ignore(256, '\n');
+		std::cin >> freq;
+	}
+
+	std::cout << "Angle (Deg): ";
+	std::cin >> amplitude; //Oscillation Maximum Angle
+	while ( std::cin.fail() || amplitude > 20 || amplitude < 0 )
+	{
+		std::cout << "Enter valid angle ( [0 - 20] Deg): ";
+		std::cin.clear();
+		std::cin.ignore(256, '\n');
+		std::cin >> amplitude;
+	}
+
+
+	/*std::cout << "Forward Velocity (m/s, +ve front): ";
+	std::cin >> packet[1];//forwardVelocity;
+	std::cout << "Vertical Acceleration (G's, +ve up): ";
+	std::cin >> packet[2];//verticalAccel;
+	std::cout << "Forward Acceleration (G's, +ve front): ";
+	std::cin >> packet[3];//forwardAccel;
+	std::cout << "Lateral Acceleration (G's, +ve right): ";
+	std::cin >> packet[4];//lateralAccel;
+	std::cout << "Pitch Angle (Degrees, +ve nose up): ";
+	std::cin >> packet[5];//pitchAngle;
+	std::cout << "Roll Angle (Degrees, +ve bank right): ";
+	std::cin >> packet[6];//rollAngle;
+	std::cout << "Heading (Degrees, 0 = North, clockwise): ";
+	std::cin >> packet[7];//heading;
+	std::cout << "Yaw Velocity (m/s, +ve yaw right): ";
+	std::cin >> packet[8];//yawVelocity;
+	std::cout << "On Ground Indicator: (1 or 0): ";
+	std::cin >> packet[9];//onGroundIndicator;*/
 }
 
 //
@@ -79,14 +95,14 @@ int main()
 	WSADATA        wsd;
 	SOCKET         s;
 	char          *sendbuf = NULL;
-	int            ret,
-		i;
+	int            ret;
+	unsigned int   i;
 	SOCKADDR_IN    recipient;
 
 	//getData();
-	/*cout << "Enter any key to begin transmission\n";
+	/*std::cout << "Enter any key to begin transmission\n";
 	int k;
-	cin >> k;*/
+	std::cin >> k;*/
 
 	if (WSAStartup(MAKEWORD(2, 2), &wsd) != 0)
 	{
@@ -105,15 +121,13 @@ int main()
 	//
 	recipient.sin_family = AF_INET;
 	recipient.sin_port = htons((short)iPort);
-	if ((recipient.sin_addr.s_addr = inet_addr(szRecipient))
-		== INADDR_NONE)
+	if ((recipient.sin_addr.s_addr = inet_addr(szRecipient)) == INADDR_NONE)
 	{
 		struct hostent *host = NULL;
 
 		host = gethostbyname(szRecipient);
 		if (host)
-			CopyMemory(&recipient.sin_addr, host->h_addr_list[0],
-				host->h_length);
+			CopyMemory(&recipient.sin_addr, host->h_addr_list[0], host->h_length);
 		else
 		{
 			printf("gethostbyname() failed: %d\n", WSAGetLastError());
@@ -156,45 +170,57 @@ int main()
 			}
 			else if (ret == 0)
 				break;
-			//cout << "!";
+			//std::cout << "!";
 		}
 	}
 	else
 	{
 		// Otherwise, use the sendto() function
 		//
-		cout << "Sending data..." << endl;
-		auto start = std::chrono::high_resolution_clock::now();//time_t start = time(0);
-
-		while (1) //GetAsyncKeyState(VK_LCONTROL) == 0) //for(i = 0; i < dwCount; i++)
+		while (1)
 		{
-			double timeStamp = (double)(chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - start).count()) / 1000; //Time Stamp (Seconds since Epoch)
-			memcpy(sendbuf, &timeStamp, 4);
-			int timer = (int)timeStamp;
-			double angle = amplitude*sin(2 * 3.14159*freq*timeStamp);
-			memcpy(&sendbuf[20 + direction * 4], &angle, 4);
-			ret = sendto(s, sendbuf, dwLength, 0,
-				(SOCKADDR *)&recipient, sizeof(recipient));
-			if (ret == SOCKET_ERROR)
+			std::cout << "Sending data... Press Escape to stop." << std::endl;
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			auto start = std::chrono::high_resolution_clock::now();//time_t start = time(0);
+
+			while (GetAsyncKeyState( VK_ESCAPE ) == 0)//for(i = 0; i < dwCount; i++)
 			{
-				printf("sendto() failed; %d\n", WSAGetLastError());
-				break;
+				double timeStamp = (double)(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count()) / 1000; //Time Stamp (Seconds since Epoch)
+				memcpy(sendbuf, &timeStamp, 4);
+				int timer = (int)timeStamp;
+				double angle = amplitude*sin(2 * 3.14159*freq*timeStamp);
+				memcpy(&sendbuf[20 + direction * 4], &angle, 4);
+				ret = sendto(s, sendbuf, dwLength, 0,
+					(SOCKADDR *)&recipient, sizeof(recipient));
+				if (ret == SOCKET_ERROR)
+				{
+					printf("sendto() failed; %d\n", WSAGetLastError());
+					break;
+				}
+				else if (ret == 0)
+					break;
+
+
+				/*float f;
+				memcpy(&f,&sendbuf,4);*/
+				//std::cout<< timeStamp <<std::endl;
+
+				/*for (int n=0; n < dwLength/4; n++)
+				{
+				float f;
+				memcpy(&f,&sendbuf[4*n],4);
+				std::cout << f << ", ";
+				}*/
+				std::this_thread::sleep_for(std::chrono::milliseconds(1)); //50Hz=20ms
 			}
-			else if (ret == 0)
-				break;
 
+			char response;
+			std::cout << "Send new data? (y/n)" << std::endl;
+			std::cin >> response;
+			if (response == 'n') break;
 
-			/*float f;
-			memcpy(&f,&sendbuf,4);*/
-			//cout<< timeStamp <<endl;
-
-			/*for (int n=0; n < dwLength/4; n++)
-			{
-			float f;
-			memcpy(&f,&sendbuf[4*n],4);
-			cout << f << ", ";
-			}*/
-			this_thread::sleep_for(chrono::milliseconds(1)); //50Hz=20ms
+			getData();
+			memcpy(sendbuf, packet, sizeof(packet));
 		}
 	}
 	closesocket(s);
@@ -202,8 +228,8 @@ int main()
 	GlobalFree(sendbuf);
 	WSACleanup();
 
-	//cout << "Enter any key to exit\n";
+	//std::cout << "Enter any key to exit\n";
 	//int j;
-	//cin >> j;
+	//std::cin >> j;
 	return 0;
 }
